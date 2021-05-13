@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <title>File To Table</title>
+    <meta charset="utf-8">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
+    <style>
+    div#paging
+    {
+      text-align: center;
+      /* スクロールに対してページングボックスの位置を固定 */
+      position: fixed;
+      /* 位置を指定 */
+      bottom: 0;
+      right:45%;
+    }
+
+    div#pagingbox{
+      background: #FFF;
+    }
+
+    th{
+      /* ヘッダ背景塗りつぶし */
+      background: #eee;
+    }
+   th,td {
+     /* 枠線を1本線指定 */
+      border: solid 1px;
+      width:auto;
+   }
+
+   table{
+     /* 枠線を1本線指定 */
+      border: solid 1px;
+      border-collapse:  collapse;
+      white-space: nowrap;
+    }
+
+    footer{
+      position: fixed;
+      width: 100%;
+      background-color: #C0C0C0;
+      padding: 15px 0;
+      bottom: 0; /*下に固定*/
+    }
+    </style>
+
+  </head>
+
+  <body>
+    <form name="myform">
+        <input name="myfile" id="myfile" type="file" /><br/>
+        <textarea name="output" id="output" cols="80" rows="10"></textarea>
+    </form>
+    <button onclick="importJson()">importJson</button>
+    <button onclick="importCsv()">importCsv</button>
+    <button onclick="clearTable()">clearTable</button>
+    <button onclick="clearText()">clearText</button>
+    <br><br>
+    <!--テーブル生成位置-->
+    <div id ='maintable'></div>
+    <table border = 1 id="csv-body"></table>
+
+    <!--ページングボタン配置-->
+    <footer>
+      <div id="paging">
+        <table>
+          <tr>
+            <tb><button id="prevbtn" type="button">&lt;</button></tb>
+              <tb>
+                <span id="currentpage">currentpage</span>
+                <span id="lastpage">lastpage</span>
+              </tb>
+            <tb><button id="nextbtn" type="button">&gt;</button></tb>
+          </tr>
+        </table>
+      </div>
+    </footer>
+
+
+    <script>
+    var form = document.forms.myform;
+        form.myfile.addEventListener( 'change', function(e) {
+            var result = e.target.files[0];
+
+            //FileReaderのインスタンスを作成する
+            var reader = new FileReader();
+  
+            //読み込んだファイルの中身を取得する
+            reader.readAsText( result );
+            
+            //CSVファイルの中身を取得後に処理を行う
+            reader.addEventListener( 'load', function() {
+        
+            //CSVの各データ毎に読み込む
+            console.log( reader.result.split(',') );
+        
+            //ファイルの中身をtextarea内に表示する
+            form.output.textContent = reader.result;
+            })
+            
+            //JSONファイルの中身を取得後に処理を行う
+            reader.addEventListener( 'load', function() {
+            
+            //JSON形式に変換する
+            console.log(JSON.parse(reader.result));
+            })
+        })
+        
+function importJson(){ 
+    //テキストエリアから要素取得しJSON形式に変換
+    var json=JSON.parse(document.getElementById('output').value);
+    
+      // table要素を生成
+      var table = document.createElement('table');
+
+      // ヘッダーを作成
+      var tr = document.createElement('tr');
+
+      for (key in json[0]) {
+            // th要素を生成
+            var th = document.createElement('th');
+            // th要素内にテキストを追加
+            th.textContent = key;
+            // th要素をtr要素の子要素に追加
+            tr.appendChild(th);
+            }
+        // tr要素をtable要素の子要素に追加
+        table.appendChild(tr);
+
+      // テーブル本体を作成
+      for (var i = 0; i < json.length; i++) {
+        // tr要素を生成
+        var tr = document.createElement('tr');
+        // th・td部分のループ
+        for (key in json[0]) {
+              // td要素を生成
+              var td = document.createElement('td');
+              // td要素内にテキストを追加
+              td.textContent = json[i][key];
+              // td要素をtr要素の子要素に追加
+              tr.appendChild(td);
+            }
+        // tr要素をtable要素の子要素に追加
+        table.appendChild(tr);
+        }
+      // 生成したtable要素を追加する
+      document.getElementById('maintable').appendChild(table);
+}
+function importCsv(){ 
+    //テキストエリアから要素取得
+    var text=document.getElementById('output').value;
+    
+    //CSVを改行で区切る
+    var tempArray=text.split('\n');
+    
+    //改行で区切ったCSVをカンマ毎に区切って配列を生成
+    var csv = new Array();
+    for(var i = 0; i<tempArray.length;i++){
+        csv[i] = tempArray[i].split(",");
+    }
+      // table要素を生成
+      var table = document.createElement('table');
+
+      // ヘッダーを作成
+      var tr = document.createElement('tr');
+
+      for (key in csv[0]) {
+            // th要素を生成
+            var th = document.createElement('th');
+            // th要素内にテキストを追加
+            th.textContent = key;
+            // th要素をtr要素の子要素に追加
+            tr.appendChild(th);
+            }
+        // tr要素をtable要素の子要素に追加
+        table.appendChild(tr);
+
+      // テーブル本体を作成
+      for (var i = 0; i < csv.length; i++) {
+        // tr要素を生成
+        var tr = document.createElement('tr');
+        // th・td部分のループ
+        for (key in csv[0]) {
+              // td要素を生成
+              var td = document.createElement('td');
+              // td要素内にテキストを追加
+              td.textContent = csv[i][key];
+              // td要素をtr要素の子要素に追加
+              tr.appendChild(td);
+            }
+        // tr要素をtable要素の子要素に追加
+        table.appendChild(tr);
+        }
+      // 生成したtable要素を追加する
+      document.getElementById('maintable').appendChild(table);
+}
+        //テーブルの消去
+        function clearTable(){
+            document.getElementById("maintable").textContent = null;
+        }
+        //テキストエリアの消去
+        function clearText(){
+            document.getElementById("output").value = null;
+            document.getElementById("myfile").value = null;
+
+        }
+    </script>
+
+
+    <script>// ページング機能
+    jQuery(function($) {
+      var page = 0;
+      var displayrows = 30;// １ページ当たり表示する行の数
+
+      function draw() {// ページの表示
+        $('#lastpage').html(Math.ceil(($('tr').size()-1)/displayrows));
+        $('#currentpage').html(page + 1);
+        $('tr').hide();
+        $('tr:first,tr:gt(' + page * displayrows + '):lt(' + displayrows + ')').show();// 変数を使用する場合は' +  + 'を忘れずに
+      }
+      $('#prevbtn').click(function() {// １ページ後進
+        if (page > 0) {
+          page--;
+          draw();
+        }
+      });
+      $('#nextbtn').click(function() {// １ページ前進
+        if (page < ($('tr').size() - 1) /displayrows - 1) {
+          page++;
+          draw();
+        }
+      });
+      draw();//初回表示
+    });
+    </script>
+  </body>
+</html>
